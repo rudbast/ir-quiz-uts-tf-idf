@@ -11,10 +11,11 @@ use Data::Dumper qw (Dumper);
 
 my $doc = "../data/Koleksi.dat";
 # my $stw = "../data/stopwords-ina.dat";
-my $res = "../data/Indeks.txt";
+my $res = "../data/hasil.txt";
+my $index = "../data/indeks.txt";
 
 ## preprocessing
-my %list = indexing($doc, $res);
+my %list = indexing($doc, $res, $index);
 
 # print Dumper \%list;
 
@@ -24,13 +25,16 @@ say "selesai.";
 
 sub indexing {
     ## open dokumen awal
-    open(FILE, "$_[0]") or die "can't open ";
+    open(FILE, "$_[0]") or die "can't open data source";
 
     ## open stopwords file
     # open(STOP,"$_[2]") or die "can't open ";
 
     ## open file hasil reduksi
-    open(INDEX,"> $_[1]") or die "can't open ";
+    open(RESULT, "> $_[1]") or die "can't open result file";
+
+    ## open file indeks kata
+    open(INDEX, "> $_[2]") or die "can't open index file";
 
     ## simpan list stopwords dalam hash
     # my %stopwords = ();
@@ -140,25 +144,31 @@ sub indexing {
     ## hitung tf-idf
     foreach my $docid (sort keys %result) {
         foreach my $docno (sort keys %{ $result{$docid} }) {
-            say INDEX "<DOCID> $docid </DOCID>";
-            say INDEX "<DOCNO> $docno </DOCNO>";
+            say RESULT "<DOCID> $docid </DOCID>";
+            say RESULT "<DOCNO> $docno </DOCNO>";
 
             foreach my $word (sort keys %{ $result{$docid}{$docno} }) {
                 if ($word ne "totalFreqEachDoc") {
                     my $currTotalFreq = $result{$docid}{$docno}{"totalFreqEachDoc"};
                     my $TFIDF = $result{$docid}{$docno}{$word} / $currTotalFreq * $IDF{$word};
 
-                    printf INDEX "%20s : %.9f\n", $word, $TFIDF;
+                    printf RESULT "%20s : %.9f\n", $word, $TFIDF;
                 }
             }
 
-            say INDEX "";
+            say RESULT "";
         }
+    }
+
+    foreach my $word (sort {$termfreq{$b} <=> $termfreq{$a}
+        or $b cmp $a} keys %termfreq) {
+        printf INDEX "%20s : %4d\n", $word, $termfreq{$word};
     }
 
     ## tutup file
     # close STOP;
     close FILE;
+    close RESULT;
     close INDEX;
 
     return %result;
