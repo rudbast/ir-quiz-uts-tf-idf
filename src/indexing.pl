@@ -10,14 +10,13 @@ use Data::Dumper qw (Dumper);
 #### Main Program
 
 my $doc = "../data/Koleksi.dat";
-my $stw = "../data/stopwords-ina.dat";
+# my $stw = "../data/stopwords-ina.dat";
 my $res = "../data/Indeks.txt";
-my $fin = "../data/Rangkuman.txt";
 
 ## preprocessing
-my %list = indexing($doc, $res, $fin, $stw);
+my %list = indexing($doc, $res);
 
-print Dumper \%list;
+# print Dumper \%list;
 
 say "selesai.";
 
@@ -28,78 +27,77 @@ sub indexing {
     open(FILE, "$_[0]") or die "can't open ";
 
     ## open stopwords file
-    open(STOP,"$_[3]") or die "can't open ";
+    # open(STOP,"$_[2]") or die "can't open ";
 
     ## open file hasil reduksi
     open(INDEX,"> $_[1]") or die "can't open ";
 
-    ## open file output rangkuman
-    open(RESULT,"> $_[2]") or die "can't open ";
-
     ## simpan list stopwords dalam hash
-    my %stopwords = ();
+    # my %stopwords = ();
 
-    while(<STOP>) {
-        chomp;
-        $stopwords{$_} = 1;
-    }
+    # while(<STOP>) {
+    #     chomp;
+    #     $stopwords{$_} = 1;
+    # }
 
     # frekuensi total
     my %termfreq = ();
+
+    # total seluruh dokumen
+    my $totalDoc = 0;
+
+    # frekuensi tiap docid - docno
     my %result = ();
 
     # frekuensi per dokumen
     my %hashKata = ();
 
     # nomor dokumen
+    my $curr_doc_id;
     my $curr_doc_no;
 
-    my %total_sentence = ();
+    # total frekuensi tiap dokumen
+    my $totalFreqEachDoc = 0;
 
     while(<FILE>) {
         chomp;
         s/\s+/ /gi;
-        ## simpan informasi mengenai nomor dokumen
-        if(/<DOCNO>/) {
-            ## cek size hashkata (workaround utk pemrosesan dokumen pertama)
-            my $size = keys %hashKata;
-            if ($size > 0) {
-                $result{$curr_doc_no} = { %hashKata };
-            }
 
+        ## update informasi docid
+        if (/<DOCID>/) {
             s/<.*?>/ /gi;
             s/\s+/ /gi;
             s/^\s+//;
             s/\s+$//;
 
-            say INDEX;
+            $curr_doc_id = $_;
+        }
+
+        ## update informasi docno
+        if (/<DOCNO>/) {
+            s/<.*?>/ /gi;
+            s/\s+/ /gi;
+            s/^\s+//;
+            s/\s+$//;
+
             ## inisialisasi ulang hashkata dan nomor dokumen tiap dokumen baru
             %hashKata = ();
             $curr_doc_no = $_;
-            $total_sentence{$curr_doc_no} = 0;
+            $totalDoc += 1;
         }
 
-        if(/<TITLE>/../<\/DOC>/) {
-            chomp;
-            if(/<\/DOC>/) {
-                ## output kata dan frekuensi tiap dokumen ke file
-                foreach my $hasil(sort {$hashKata{$b} <=> $hashKata{$a}
-                    or $a cmp $b} keys %hashKata) {
-                    say INDEX "$hasil;$hashKata{$hasil}";
-                }
+        if (/<\/DOC>/) {
+            ## simpan frekuensi tiap kata dalam tiap docid - docno
+            $result{$curr_doc_id}{$curr_doc_no} = { %hashKata };
+            ## simpan total frekuensi kata dalam tiap docid - docno
+            $result{$curr_doc_id}{$curr_doc_no}{"totalFreqEachDoc"} = $totalFreqEachDoc;
 
-                # jumlah kalimat per dokumen
-            }
+            ## kosongkan daftar frekuensi kata untuk dokumen selanjutnya
+            %hashKata = ();
+            $totalFreqEachDoc = 0;
+        }
 
-            if(/<TEXT>/../<\/TEXT>/) {
-                my $line = $_;
-                $line =~ s/<.*?>/ /gi;
-                $line =~ s/\s+/ /gi;
-                $line =~ s/^\s+//;
-                $line =~ s/\s+$//;
-                $total_sentence{$curr_doc_no} += scalar(split /\./, $line);
-            }
-
+        if (/<TEXT>/../<\/TEXT>/) {
             s/<.*?>/ /gi;
             s/[#\%\$\&\/\\,;:!?\.\@+`'"\*()_{}^=|]/ /g;
             s/\s+/ /gi;
@@ -112,7 +110,7 @@ sub indexing {
 
             foreach my $kata(@splitKorpus) {
                 ## cek kata apakah termasuk dalam list stopwords
-                unless (exists($stopwords{$kata})) {
+                # unless (exists($stopwords{$kata})) {
                     if (exists($hashKata{$kata})) {
                         $hashKata{$kata} += 1;
                     } else {
@@ -122,54 +120,46 @@ sub indexing {
                     if (exists($termfreq{$kata})) {
                         $termfreq{$kata} += 1;
                     } else {
-                        $termfreq{$kata} += 1;
+                        $termfreq{$kata} = 1;
                     }
+                # }
+            }
+
+            ## increment jumlah frekuensi kata dalam dokumen
+            $totalFreqEachDoc += scalar @splitKorpus;
+        }
+    }
+
+    ## hitung idf
+    my %IDF = ();
+
+    foreach my $word (keys %termfreq) {
+        $IDF{$word} = $termfreq{$word} / $totalDoc;
+    }
+
+    ## hitung tf-idf
+    foreach my $docid (sort keys %result) {
+        foreach my $docno (sort keys %{ $result{$docid} }) {
+            say INDEX "<DOCID> $docid </DOCID>";
+            say INDEX "<DOCNO> $docno </DOCNO>";
+
+            foreach my $word (sort keys %{ $result{$docid}{$docno} }) {
+                if ($word ne "totalFreqEachDoc") {
+                    my $currTotalFreq = $result{$docid}{$docno}{"totalFreqEachDoc"};
+                    my $TFIDF = $result{$docid}{$docno}{$word} / $currTotalFreq * $IDF{$word};
+
+                    printf INDEX "%20s : %.9f\n", $word, $TFIDF;
                 }
             }
+
+            say INDEX "";
         }
     }
 
     ## tutup file
-    close STOP;
+    # close STOP;
     close FILE;
     close INDEX;
-
-    # daftar 20 kata paling atas
-    say RESULT "=> Daftar 20 kata paling atas : ";
-    my $jumlah = 1;
-    foreach my $kata (sort {$termfreq{$b} <=> $termfreq{$a}
-        or $a cmp $b} keys %termfreq) {
-        if($jumlah > 20) {
-            last;
-        }
-        say RESULT "$jumlah. $kata : $termfreq{$kata}";
-        $jumlah += 1;
-    }
-
-    # daftar 20 kata paling bawah
-    $jumlah = 1;
-    say RESULT "\n=> Daftar 20 kata paling bawah : ";
-    foreach my $kata (sort {$termfreq{$a} <=> $termfreq{$b}
-        or $b cmp $a} keys %termfreq) {
-        if($jumlah > 20) {
-            last;
-        }
-        say RESULT "$jumlah. $kata : $termfreq{$kata}";
-        $jumlah += 1;
-    }
-
-    my $total_sentence_count = 0;
-    # jumlah kalimat per dokumen
-    say RESULT "\n=> Jumlah kalimat per dokumen : ";
-    foreach my $doc (sort keys %total_sentence) {
-        say RESULT "$doc : $total_sentence{$doc}";
-        $total_sentence_count += $total_sentence{$doc};
-    }
-
-    # jumlah kalimat yang ada dalam seluruh dokumen
-    say RESULT "\n=> Jumlah kalimat seluruh dokumen : $total_sentence_count";
-
-    close RESULT;
 
     return %result;
 }
