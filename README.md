@@ -9,14 +9,14 @@ perl indexing.pl
 perl vsm-similarity-product.pl
 ```
 
-atau ganti file permission menjadi executeable `chmod +x .` kemudian tinggal jalankan
+atau ganti file permission menjadi executeable `chmod +x *` kemudian jalankan
 
 ```shell
 ./indexing.pl
 ./vsm-similarity-product.pl
 ```
 
-## license
+## License
 Copyright © 2015 Rudy <rudolf_bast@live.com>
 This work is free. You can redistribute it and/or modify it under the
 terms of the Do What The Fuck You Want To Public License, Version 2,
