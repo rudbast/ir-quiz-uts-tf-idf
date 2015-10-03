@@ -1,8 +1,15 @@
 :: TF-IDF ::
- Dokumen/Kata        juara    sepakbola    mahasiswa  universitas   indonesia
+ Dokumen/Kata        juara    sepakbola    mahasiswa  universitas    indonesia
            D1        1.748        2.444        0.384        0.000        0.183
            D2        2.600        0.000        0.792        0.404        0.378
            D3        0.554        0.774        0.607        0.580        0.579
-Query ? D1 : 1.39765136123785
-D2 : 3.8240799987003
-D3 : 3.56078550808341
+
+Query ? juara sepakbola
+:: Hasil ::
+[Similarity Product / Inner Product]
+D1 : 22.966
+D2 : 17.272
+D3 : 7.273
+
+=> Dokumen paling relevan       : D1
+=> Dokumen paling tidak relevan : D3
