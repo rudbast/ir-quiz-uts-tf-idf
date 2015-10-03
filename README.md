@@ -20,7 +20,7 @@ atau ganti file permission menjadi executeable `chmod +x *` kemudian jalankan
 
 Contoh hasil output untuk program perhitungan vector space model
 
-![alt tag](https://github.com/rudbast/ir-quiz-uts-tf-idf/tree/gh-pages/img/vsm-output.png)
+![alt tag](https://github.com/rudbast/ir-quiz-uts-tf-idf/blob/gh-pages/img/vsm-output.png)
 
 ## License
 Copyright © 2015 Rudy <rudolf_bast@live.com>
