@@ -16,6 +16,12 @@ atau ganti file permission menjadi executeable `chmod +x *` kemudian jalankan
 ./vsm-similarity-product.pl
 ```
 
+## Output
+
+Contoh hasil output untuk program perhitungan vector space model
+
+![alt tag](https://github.com/rudbast/ir-quiz-uts-tf-idf/tree/gh-pages/img/vsm-output.png)
+
 ## License
 Copyright © 2015 Rudy <rudolf_bast@live.com>
 This work is free. You can redistribute it and/or modify it under the
