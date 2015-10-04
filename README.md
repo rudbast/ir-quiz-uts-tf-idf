@@ -1,15 +1,15 @@
-# Information Retrieval Quiz [Oct 2015]
+# IR Quiz Assignment [Oct 2015]
 
 ## How to
 
-Jalankan program pada folder src/
+Run program in src/
 
 ```shell
 perl indexing.pl
 perl vsm-similarity-product.pl
 ```
 
-atau ganti file permission menjadi executeable `chmod +x *` kemudian jalankan
+or just change file permission to executable `chmod +x *` and run
 
 ```shell
 ./indexing.pl
@@ -18,7 +18,9 @@ atau ganti file permission menjadi executeable `chmod +x *` kemudian jalankan
 
 ## Output
 
-Contoh hasil output untuk program perhitungan vector space model
+Program result is in out/ 
+
+Output example for vsm-similarity-product.pl
 
 ![alt tag](https://github.com/rudbast/ir-quiz-uts-tf-idf/blob/gh-pages/img/vsm-output.png)
 
