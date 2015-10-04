@@ -44,10 +44,10 @@ sub indexing {
     #     $stopwords{$_} = 1;
     # }
 
-    ## frekuensi kemunculan kata pada seluruh dokumen
+    ## total kata muncul pada berapa dokumen
     my %termfreq = ();
 
-    ## total seluruh dokumen
+    ## total banyaknya dokumen
     my $totalDoc = 0;
 
     ## frekuensi tiap docid - docno
