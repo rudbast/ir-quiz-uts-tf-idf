@@ -44,24 +44,24 @@ sub indexing {
     #     $stopwords{$_} = 1;
     # }
 
-    # frekuensi total
+    ## frekuensi kemunculan kata pada seluruh dokumen
     my %termfreq = ();
 
-    # total seluruh dokumen
+    ## total seluruh dokumen
     my $totalDoc = 0;
 
-    # frekuensi tiap docid - docno
+    ## frekuensi tiap docid - docno
     my %result = ();
 
-    # frekuensi per dokumen
+    ## frekuensi per dokumen
     my %hashKata = ();
 
-    # nomor dokumen
+    ## nomor dokumen
     my $curr_doc_id;
     my $curr_doc_no;
 
-    # total frekuensi tiap dokumen
-    my $totalFreqEachDoc = 0;
+    ## total banyaknya kata tiap dokumen
+    my $totalWordsEachDoc = 0;
 
     while(<FILE>) {
         chomp;
@@ -74,6 +74,7 @@ sub indexing {
             s/^\s+//;
             s/\s+$//;
 
+            ## inisialisasi ulang doc id baru
             $curr_doc_id = $_;
         }
 
@@ -84,21 +85,35 @@ sub indexing {
             s/^\s+//;
             s/\s+$//;
 
-            ## inisialisasi ulang hashkata dan nomor dokumen tiap dokumen baru
+            ## inisialisasi ulang daftar kata dan docno tiap dokumen baru
             %hashKata = ();
             $curr_doc_no = $_;
+
+            ## increment informasi banyaknya dokumen
             $totalDoc += 1;
         }
 
         if (/<\/DOC>/) {
             ## simpan frekuensi tiap kata dalam tiap docid - docno
             $result{$curr_doc_id}{$curr_doc_no} = { %hashKata };
-            ## simpan total frekuensi kata dalam tiap docid - docno
-            $result{$curr_doc_id}{$curr_doc_no}{"totalFreqEachDoc"} = $totalFreqEachDoc;
+            ## simpan total banyaknya kata dalam tiap docid - docno
+            $result{$curr_doc_id}{$curr_doc_no}{"totalWordsEachDoc"} = $totalWordsEachDoc;
+
+            ## hitung frekuensi kemunculan kata untuk seluruh dokumen
+            foreach my $kata (keys %hashKata) {
+                if (exists($termfreq{$kata})) {
+                    $termfreq{$kata} += 1;
+                } else {
+                    $termfreq{$kata} = 1;
+                }
+            }
+
+            # say scalar keys %hashKata;
+            # say $totalWordsEachDoc;
 
             ## kosongkan daftar frekuensi kata untuk dokumen selanjutnya
             %hashKata = ();
-            $totalFreqEachDoc = 0;
+            $totalWordsEachDoc = 0;
         }
 
         if (/<TEXT>/../<\/TEXT>/) {
@@ -120,17 +135,11 @@ sub indexing {
                     } else {
                         $hashKata{$kata} = 1;
                     }
-
-                    if (exists($termfreq{$kata})) {
-                        $termfreq{$kata} += 1;
-                    } else {
-                        $termfreq{$kata} = 1;
-                    }
                 # }
             }
 
             ## increment jumlah frekuensi kata dalam dokumen
-            $totalFreqEachDoc += scalar @splitKorpus;
+            $totalWordsEachDoc += scalar @splitKorpus;
         }
     }
 
@@ -148,8 +157,8 @@ sub indexing {
             say RESULT "<DOCNO> $docno </DOCNO>";
 
             foreach my $word (sort keys %{ $result{$docid}{$docno} }) {
-                if ($word ne "totalFreqEachDoc") {
-                    my $currTotalFreq = $result{$docid}{$docno}{"totalFreqEachDoc"};
+                if ($word ne "totalWordsEachDoc") {
+                    my $currTotalFreq = $result{$docid}{$docno}{"totalWordsEachDoc"};
                     my $TFIDF = $result{$docid}{$docno}{$word} / $currTotalFreq * $IDF{$word};
 
                     printf RESULT "%20s : %.9f\n", $word, $TFIDF;
@@ -161,7 +170,7 @@ sub indexing {
     }
 
     foreach my $word (sort {$termfreq{$b} <=> $termfreq{$a}
-        or $b cmp $a} keys %termfreq) {
+        or $a cmp $b} keys %termfreq) {
         printf INDEX "%20s : %4d\n", $word, $termfreq{$word};
     }
 
