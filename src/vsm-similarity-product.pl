@@ -11,11 +11,11 @@ my $totalDoc = $ARGV[0] || 1000;
 # $totalDoc = 1000 if not defined $totalDoc;
 
 ## File total frekuensi seluruh dokumen (argumen cmd / terminal)
-my $totalFreqDoc = $ARGV[1] || "../data/total-word-freq.dat";
+my $totalFreqDoc = $ARGV[1] || "../res/total-word-freq.dat";
 # $totalFreqDoc = "total-word-freq.dat" if not defined $totalFreqDoc;
 
 ## File detail frekuensi sebagain dokumen (argumen cmd / terminal)
-my $freqDetailDoc = $ARGV[2] || "../data/words-freq.dat";
+my $freqDetailDoc = $ARGV[2] || "../res/words-freq.dat";
 # $freqDetailDoc = "words-freq.dat" if not defined $freqDetailDoc;
 
 

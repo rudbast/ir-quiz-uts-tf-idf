@@ -9,10 +9,11 @@ use Data::Dumper qw (Dumper);
 
 #### Main Program
 
-my $doc = "../data/Koleksi.dat";
-# my $stw = "../data/stopwords-ina.dat";
-my $res = "../data/hasil.txt";
-my $index = "../data/indeks.txt";
+my $doc = "../res/Koleksi.dat";
+# my $stw = "../res/stopwords-ina.dat";
+
+my $res = "../out/hasil.txt";
+my $index = "../out/indeks.txt";
 
 ## preprocessing
 my %list = indexing($doc, $res, $index);
