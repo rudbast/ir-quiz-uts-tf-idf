@@ -148,7 +148,7 @@ sub indexing {
     my %IDF = ();
 
     foreach my $word (keys %termfreq) {
-        $IDF{$word} = $termfreq{$word} / $totalDoc;
+        $IDF{$word} = log2($totalDoc / $termfreq{$word});
     }
 
     ## hitung tf-idf
@@ -182,4 +182,9 @@ sub indexing {
     close INDEX;
 
     return %result;
+}
+
+sub log2 {
+    my $n = shift;
+    return log($n) / log(2);
 }
