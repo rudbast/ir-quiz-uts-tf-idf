@@ -46,7 +46,10 @@ sub indexing {
     # }
 
     ## total kata muncul pada berapa dokumen
-    my %termfreq = ();
+    my %docTermFreq = ();
+
+    ## frekuensi kata seluruh dokumen
+    my %globalTermFreq = ();
 
     ## total banyaknya dokumen
     my $totalDoc = 0;
@@ -102,10 +105,10 @@ sub indexing {
 
             ## hitung frekuensi kemunculan kata untuk seluruh dokumen
             foreach my $kata (keys %hashKata) {
-                if (exists($termfreq{$kata})) {
-                    $termfreq{$kata} += 1;
+                if (exists($docTermFreq{$kata})) {
+                    $docTermFreq{$kata} += 1;
                 } else {
-                    $termfreq{$kata} = 1;
+                    $docTermFreq{$kata} = 1;
                 }
             }
 
@@ -136,6 +139,12 @@ sub indexing {
                     } else {
                         $hashKata{$kata} = 1;
                     }
+
+                    if (exists($globalTermFreq{$kata})) {
+                        $globalTermFreq{$kata} += 1;
+                    } else {
+                        $globalTermFreq{$kata} = 1;
+                    }
                 # }
             }
 
@@ -147,8 +156,8 @@ sub indexing {
     ## hitung idf
     my %IDF = ();
 
-    foreach my $word (keys %termfreq) {
-        $IDF{$word} = log2($totalDoc / $termfreq{$word});
+    foreach my $word (keys %docTermFreq) {
+        $IDF{$word} = log2($totalDoc / $docTermFreq{$word});
     }
 
     ## hitung tf-idf
@@ -170,9 +179,9 @@ sub indexing {
         }
     }
 
-    foreach my $word (sort {$termfreq{$b} <=> $termfreq{$a}
-        or $a cmp $b} keys %termfreq) {
-        printf INDEX "%20s : %4d\n", $word, $termfreq{$word};
+    foreach my $word (sort {$globalTermFreq{$b} <=> $globalTermFreq{$a}
+        or $a cmp $b} keys %globalTermFreq) {
+        printf INDEX "%20s : %4d\n", $word, $globalTermFreq{$word};
     }
 
     ## tutup file
