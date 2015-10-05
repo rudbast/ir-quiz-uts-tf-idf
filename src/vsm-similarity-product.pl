@@ -134,10 +134,20 @@ print "\n";
 
 #### COMPUTE SIMILARITY
 print "Query ? ";
-chomp(my $query = <STDIN>);
+chomp(my $input = <STDIN>);
 
-my @queries = split /\s/, $query;
+## Container query
+my %query = ();
 
+foreach my $word (split /\s/, $input) {
+    if (exists($query{ $word })) {
+        $query{ $word } += 1;
+    } else {
+        $query{ $word } = 1;
+    }
+}
+
+## Container hasil perhitungan similarity
 my %result = ();
 
 ### Similarity Product / Inner Product
@@ -145,8 +155,8 @@ my %result = ();
 foreach my $doc (sort keys %freqList) {
     my $total = 0;
 
-    foreach my $word (@queries) {
-        $total += $idf{ $word } * $tfIdf{ $doc }{ $word };
+    foreach my $word (keys %query) {
+        $total += $idf{ $word } * $query{ $word } * $tfIdf{ $doc }{ $word };
     }
 
     $result{ $doc } = $total;
