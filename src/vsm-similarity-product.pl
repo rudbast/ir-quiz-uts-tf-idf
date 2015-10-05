@@ -140,6 +140,8 @@ chomp(my $input = <STDIN>);
 my %query = ();
 
 foreach my $word (split /\s/, $input) {
+    $word =~ tr/[A-Z]/[a-z]/;
+
     if (exists($query{ $word })) {
         $query{ $word } += 1;
     } else {
